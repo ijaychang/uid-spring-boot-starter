@@ -21,11 +21,11 @@
     <distributionManagement>
         <repository>
             <id>zcckj_releases</id>
-            <url>http://10.1.10.240:8081/nexus/content/repositories/zcckj_releases</url>
+            <url>http://nexus.zcckj.com/repository/zcckj_releases/</url>
         </repository>
         <snapshotRepository>
             <id>zcckj_snapshots</id>
-            <url>http://10.1.10.240:8081/nexus/content/repositories/zcckj_snapshots</url>
+            <url>http://nexus.zcckj.com/repository/zcckj_snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
