@@ -1,11 +1,14 @@
 package com.zcckj.uid.autoconfigure;
 
 import com.zcckj.uid.UidGenerator;
+import com.zcckj.uid.annotation.EnableUID;
 import com.zcckj.uid.impl.CachedUidGenerator;
 import com.zcckj.uid.impl.DefaultUidGenerator;
 import com.zcckj.uid.worker.DisposableWorkerIdAssigner;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +25,9 @@ import org.springframework.context.annotation.Configuration;
  *
  *  </p>
  */
+
 @Configuration
+@ConditionalOnBean(annotation = EnableUID.class)
 @EnableConfigurationProperties(UIDGeneratorProperties.class)//指定类的配置
 @ConditionalOnClass(UidGenerator.class)
 public class UIDGeneratorAutoConfiguration {
@@ -38,6 +43,7 @@ public class UIDGeneratorAutoConfiguration {
 	}
 
 	@Bean
+    @ConditionalOnMissingBean
 	public UidGenerator createUidGenerator() {
 		DisposableWorkerIdAssigner disposableWorkerIdAssigner = new DisposableWorkerIdAssigner();
 		disposableWorkerIdAssigner.setZookeeperConnection(properties.getZookeeperConnection());
