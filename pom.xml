@@ -5,7 +5,7 @@
 
     <groupId>com.zcckj.uid</groupId>
     <artifactId>uid-spring-boot-starter</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.6</version>
     <packaging>jar</packaging>
 
     <name>uid-spring-boot-starter</name>
@@ -53,12 +53,19 @@
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>
             <version>2.13.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.zookeeper</groupId>
+                    <artifactId>zookeeper</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.curator</groupId>
-            <artifactId>curator-framework</artifactId>
-            <version>2.13.0</version>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.4.13</version>
+            <type>pom</type>
         </dependency>
 
 
