@@ -47,8 +47,9 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
 		try {
 
 			if (client.checkExists().forPath(SEQ_ZNODE) == null) {
-				client.create().forPath(SEQ_ZNODE, new byte[0]);
+				client.create().creatingParentsIfNeeded().forPath(SEQ_ZNODE, new byte[0]);
 			} else {
+			    // 此操作目的是为了更新dataVersion
 				client.setData().forPath(SEQ_ZNODE, new byte[0]);
 			}
 			Stat stat = new Stat();
