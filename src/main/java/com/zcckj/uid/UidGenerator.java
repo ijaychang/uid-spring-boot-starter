@@ -19,6 +19,14 @@ public interface UidGenerator {
     long getUID() throws UidGenerateException;
 
     /**
+     * Get a history unique ID
+     *
+     * @return UID
+     * @throws UidGenerateException
+     */
+    long getHistoryUID(long historyTimestamp) throws UidGenerateException;
+
+    /**
      * Parse the UID into elements which are used to generate the UID. <br>
      * Such as timestamp & workerId & sequence...
      *
