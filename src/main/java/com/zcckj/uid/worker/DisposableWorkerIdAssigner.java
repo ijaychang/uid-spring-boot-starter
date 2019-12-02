@@ -1,21 +1,17 @@
 package com.zcckj.uid.worker;
 
-import com.sun.scenario.effect.impl.prism.PrImage;
 import com.zcckj.uid.utils.NetUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.PropertiesPersister;
 
 import java.io.File;
 import java.io.FileOutputStream;

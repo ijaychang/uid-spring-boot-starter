@@ -94,7 +94,7 @@ public class DefaultUidGenerator implements UidGenerator, InitializingBean {
     @Override
     public long getHistoryUID(long historyTimeMillis) throws UidGenerateException {
         try {
-            return historyId(historyTimeMillis);
+            return historyId(historyTimeMillis,true);
         } catch (Exception e) {
             LOGGER.error("Generate unique id exception. ", e);
             throw new UidGenerateException(e);
@@ -162,9 +162,10 @@ public class DefaultUidGenerator implements UidGenerator, InitializingBean {
      * @return UID
      * @throws UidGenerateException in the case: Clock moved backwards; Exceeds the max timestamp
      */
-    protected synchronized long historyId(long historyTimeMillis) {
+    protected synchronized long historyId(long historyTimeMillis,boolean isBegin) {
         long historySecond = getHistorySecond(historyTimeMillis);
         // Allocate bits for UID
+        sequence = isBegin ? 0L: bitsAllocator.getMaxSequence();
         return bitsAllocator.allocate(historySecond - epochSeconds, workerId, sequence);
     }
 
@@ -233,6 +234,26 @@ public class DefaultUidGenerator implements UidGenerator, InitializingBean {
         if (StringUtils.isNotBlank(epochStr)) {
             this.epochStr = epochStr;
             this.epochSeconds = TimeUnit.MILLISECONDS.toSeconds(DateUtils.parseByDayPattern(epochStr).getTime());
+        }
+    }
+
+    @Override
+    public synchronized long getHistoryUIDOfBeginSequence(long historyTimeMillis) {
+        try {
+            return historyId(historyTimeMillis,true);
+        } catch (Exception e) {
+            LOGGER.error("Generate unique id exception. ", e);
+            throw new UidGenerateException(e);
+        }
+    }
+
+    @Override
+    public synchronized long getEndHistoryUIDOfEndSequence(long historyTimeMillis) {
+        try {
+            return historyId(historyTimeMillis,false);
+        } catch (Exception e) {
+            LOGGER.error("Generate unique id exception. ", e);
+            throw new UidGenerateException(e);
         }
     }
 }
