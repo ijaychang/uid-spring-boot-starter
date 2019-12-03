@@ -27,4 +27,28 @@ public interface UidGenerator {
      */
     String parseUID(long uid);
 
+    /**
+     * Get a history unique ID
+     *
+     * @return UID
+     * @throws UidGenerateException
+     */
+    long getHistoryUID(long historyTimestamp) throws UidGenerateException;
+
+    /***
+     * 获取截止的id(即sequence值最效)
+     *
+     * @param historyTimeMillis
+     * @return long
+     */
+
+    long getHistoryUIDOfBeginSequence(long historyTimeMillis);
+
+    /***
+     * 获取截止的id(即sequence值最大)
+     *
+     * @param historyTimeMillis
+     * @return long
+     */
+    long getEndHistoryUIDOfEndSequence(long historyTimeMillis);
 }

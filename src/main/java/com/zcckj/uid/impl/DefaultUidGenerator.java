@@ -92,6 +92,16 @@ public class DefaultUidGenerator implements UidGenerator, InitializingBean {
     }
 
     @Override
+    public long getHistoryUID(long historyTimeMillis) throws UidGenerateException {
+        try {
+            return historyId(historyTimeMillis,true);
+        } catch (Exception e) {
+            LOGGER.error("Generate unique id exception. ", e);
+            throw new UidGenerateException(e);
+        }
+    }
+
+    @Override
     public String parseUID(long uid) {
         long totalBits = BitsAllocator.TOTAL_BITS;
         long signBits = bitsAllocator.getSignBits();
@@ -147,6 +157,19 @@ public class DefaultUidGenerator implements UidGenerator, InitializingBean {
     }
 
     /**
+     * Get UID
+     *
+     * @return UID
+     * @throws UidGenerateException in the case: Clock moved backwards; Exceeds the max timestamp
+     */
+    protected synchronized long historyId(long historyTimeMillis,boolean isBegin) {
+        long historySecond = getHistorySecond(historyTimeMillis);
+        // Allocate bits for UID
+        sequence = isBegin ? 0L: bitsAllocator.getMaxSequence();
+        return bitsAllocator.allocate(historySecond - epochSeconds, workerId, sequence);
+    }
+
+    /**
      * Get next millisecond
      */
     private long getNextSecond(long lastTimestamp) {
@@ -168,6 +191,18 @@ public class DefaultUidGenerator implements UidGenerator, InitializingBean {
         }
 
         return currentSecond;
+    }
+
+    /**
+     * Get current second
+     */
+    private long getHistorySecond(long historyTimeMillis) {
+        long historySecond = TimeUnit.MILLISECONDS.toSeconds(historyTimeMillis);
+        if (historySecond - epochSeconds > bitsAllocator.getMaxDeltaSeconds()) {
+            throw new UidGenerateException("Timestamp bits is exhausted. Refusing UID generate. HistorySecond: " + historySecond);
+        }
+
+        return historySecond;
     }
 
     /**
@@ -199,6 +234,26 @@ public class DefaultUidGenerator implements UidGenerator, InitializingBean {
         if (StringUtils.isNotBlank(epochStr)) {
             this.epochStr = epochStr;
             this.epochSeconds = TimeUnit.MILLISECONDS.toSeconds(DateUtils.parseByDayPattern(epochStr).getTime());
+        }
+    }
+
+    @Override
+    public synchronized long getHistoryUIDOfBeginSequence(long historyTimeMillis) {
+        try {
+            return historyId(historyTimeMillis,true);
+        } catch (Exception e) {
+            LOGGER.error("Generate unique id exception. ", e);
+            throw new UidGenerateException(e);
+        }
+    }
+
+    @Override
+    public synchronized long getEndHistoryUIDOfEndSequence(long historyTimeMillis) {
+        try {
+            return historyId(historyTimeMillis,false);
+        } catch (Exception e) {
+            LOGGER.error("Generate unique id exception. ", e);
+            throw new UidGenerateException(e);
         }
     }
 }
