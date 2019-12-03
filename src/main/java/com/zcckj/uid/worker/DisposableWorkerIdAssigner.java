@@ -1,6 +1,5 @@
 package com.zcckj.uid.worker;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -8,6 +7,7 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 /**
  * Represents an implementation of {@link WorkerIdAssigner}, 
@@ -29,15 +29,17 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
 	 *
 	 * @return assigned worker id
 	 */
-	public long assignWorkerId() {
+	@Override
+    public long assignWorkerId() {
 		long znodeSeq = znodeSeq();
+		Assert.isTrue(znodeSeq != -1L,"znodeSeq must not equals -1L");
 		LOGGER.info("Add worker node:" + znodeSeq);
 		return znodeSeq;
 	}
 
 
 	public long znodeSeq() {
-		long versionAsSeq = RandomUtils.nextLong(0, 100000);
+		long versionAsSeq = -1L;
 		RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
 		CuratorFramework client = CuratorFrameworkFactory.builder().connectString(this.zookeeperConnection)
 				.sessionTimeoutMs(SESSION_TIMEOUT).connectionTimeoutMs(CONNECTION_TIMEOUT).retryPolicy(retryPolicy)
@@ -45,7 +47,6 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
 		client.start();
 
 		try {
-
 			if (client.checkExists().forPath(SEQ_ZNODE) == null) {
 				client.create().creatingParentsIfNeeded().forPath(SEQ_ZNODE, new byte[0]);
 			} else {
@@ -55,6 +56,7 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
 			Stat stat = new Stat();
 			client.getData().storingStatIn(stat).forPath(SEQ_ZNODE);
 			versionAsSeq = stat.getVersion();
+
 			return versionAsSeq;
 		} catch (Exception ignored) {
 		} finally {
