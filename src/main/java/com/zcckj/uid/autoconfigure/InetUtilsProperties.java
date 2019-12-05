@@ -34,7 +34,7 @@ public class InetUtilsProperties {
     /**
      * Prefix for the Inet Utils properties.
      */
-    public static final String PREFIX = "uid.serviceIp";
+    public static final String PREFIX = "uid.service-ip";
 
 
     /**

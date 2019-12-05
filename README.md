@@ -2,12 +2,14 @@
 
 ## UID添加到项目中
 1. 添加依赖
-
+```xml
     <dependency>
       <groupId>com.zcckj.uid</groupId>
       <artifactId>uid-spring-boot-starter</artifactId>
       <version>1.1.0</version>
     </dependency>
+```
+
 
 2. apollo public config  `development.uid.generator`
 
@@ -21,8 +23,8 @@
 * uid.seqBits 10
 * uid.type cached
 * uid.epochStr 2014-12-31
-* uid.serviceIp.preferred-networks 指定一个IP前缀 
-
+* uid.service-ip.preferred-networks 指定一个IP前缀 
+* uid.service-ip.default-ip-address 强制指定一个IP（优先级最高）
 ```yaml
 uid:
   timeBits: 32
@@ -31,7 +33,7 @@ uid:
   zookeeperConnection: 171.188.0.161:2181
   type: cached
   epochStr: 2014-12-31
-  serviceIp:
+  service-ip:
     preferred-networks: 10.1.80
 server:
   port: 8084
