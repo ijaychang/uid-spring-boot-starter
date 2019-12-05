@@ -21,6 +21,7 @@ import com.zcckj.uid.utils.PaddedAtomicLong;
  * 
  * @author fsren
  */
+@SuppressWarnings("Duplicates")
 public class BufferPaddingExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(RingBuffer.class);
 
@@ -133,6 +134,41 @@ public class BufferPaddingExecutor {
         }
 
         // fill the rest slots until to catch the cursor
+        boolean isFullRingBuffer = false;
+        while (!isFullRingBuffer) {
+            List<Long> uidList = uidProvider.provide(lastSecond.incrementAndGet());
+            for (Long uid : uidList) {
+                isFullRingBuffer = !ringBuffer.put(uid);
+                if (isFullRingBuffer) {
+                    break;
+                }
+            }
+        }
+
+        // not running now
+        running.compareAndSet(true, false);
+        LOGGER.info("End to padding buffer lastSecond:{}. {}", lastSecond.get(), ringBuffer);
+    }
+
+    /**
+     * Padding buffer fill the slots until to catch the cursor
+     */
+    public Boolean booleanPaddingBuffer() {
+        LOGGER.info("Ready to padding buffer lastSecond:{}. {}", lastSecond.get(), ringBuffer);
+
+        // is still running
+        if (!running.compareAndSet(false, true)) {
+            LOGGER.info("Padding buffer is still running. {}", ringBuffer);
+            return false;
+        }
+
+        // fill the rest slots until to catch the cursor
+        putBuffer();
+        return  true;
+    }
+
+    private void putBuffer() {
+
         boolean isFullRingBuffer = false;
         while (!isFullRingBuffer) {
             List<Long> uidList = uidProvider.provide(lastSecond.incrementAndGet());
