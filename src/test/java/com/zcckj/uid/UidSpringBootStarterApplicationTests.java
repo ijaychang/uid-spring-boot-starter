@@ -56,16 +56,17 @@ public class UidSpringBootStarterApplicationTests {
     public void test1() {
         DisposableWorkerIdAssigner workerIdAssigner = new DisposableWorkerIdAssigner();
         workerIdAssigner.setZookeeperConnection("171.188.0.161:2181");
-        workerIdAssigner.setServicePort(8080);
+        workerIdAssigner.setServicePort(8088);
+        workerIdAssigner.setServiceIp("10.1.80.62");
         String epochStr = "2014-12-31";
         /***
          *
          * +------+----------------------+----------------+-----------+
          * | sign |     delta seconds    | worker node id | sequence  |
          * +------+----------------------+----------------+-----------+
-         *   1bit          32bits              21bits         10bits
+         *   1bit          34bits              17bits         12bits
          */
-        int timeBits = 32,workerBits = 21,seqBits = 10;
+        int timeBits = 34,workerBits = 17,seqBits = 12;
         DefaultUidGenerator defaultUidGenerator = new DefaultUidGenerator();
         defaultUidGenerator.setEpochStr(epochStr);
         defaultUidGenerator.setTimeBits(timeBits);

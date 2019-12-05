@@ -27,9 +27,9 @@
 * uid.service-ip.default-ip-address 强制指定一个IP（优先级最高）
 ```yaml
 uid:
-  timeBits: 32
-  workerBits: 21
-  seqBits: 10
+  timeBits: 34
+  workerBits: 17
+  seqBits: 12
   zookeeperConnection: 171.188.0.161:2181
   type: cached
   epochStr: 2014-12-31
@@ -38,7 +38,9 @@ uid:
 server:
   port: 8084
 ```
+以上配置timeBits:34，epochStr:2014-12-31，可以用499年,理论上一个服务实例每秒可生成4096个id
 ## workId分配的思路
 
 workId的分配是根据服务的IP#PORT来的，如果之前在zookeeper中有分配过，会使用已经分配过的workId,未分配过那么会使用zookeeper的持久顺序节点生成一个节点(路径为/uid-generator/workId/sequence/服务IP#服务PORT-数字序列)，
 然后使用节点的序列后缀作为workId,并将此workId缓存在zookeeper中(路径为/uid-generator/workId/storage/服务IP#服务PORT)。
+
