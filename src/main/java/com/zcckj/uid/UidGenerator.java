@@ -29,11 +29,11 @@ public interface UidGenerator {
 
     /**
      * Get a history unique ID
-     *
+     * @param historyTimestamp
      * @return UID
      * @throws UidGenerateException
      */
-    long getHistoryUID(long historyTimestamp) throws UidGenerateException;
+    long getHistoryUID(long historyTimestamp);
 
     /***
      * 获取截止的id(即sequence值最效)
