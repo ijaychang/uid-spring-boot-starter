@@ -64,9 +64,9 @@ public class UidSpringBootStarterApplicationTests {
          * +------+----------------------+----------------+-----------+
          * | sign |     delta seconds    | worker node id | sequence  |
          * +------+----------------------+----------------+-----------+
-         *   1bit          34bits              17bits         12bits
+         *   1bit          32bits              21bits         10bits
          */
-        int timeBits = 34,workerBits = 17,seqBits = 12;
+        int timeBits = 32,workerBits = 21,seqBits = 10;
         DefaultUidGenerator defaultUidGenerator = new DefaultUidGenerator();
         defaultUidGenerator.setEpochStr(epochStr);
         defaultUidGenerator.setTimeBits(timeBits);
@@ -85,7 +85,6 @@ public class UidSpringBootStarterApplicationTests {
         long maxSecond = (long) Math.pow(2.0D,timeBits);
         long years = (maxSecond-epochSecond)/ (3600 * 24 * 365);
         System.out.println("By this config uid can use "+years+" years");
-
 
         ZoneId zoneId = ZoneId.systemDefault();
         System.out.println(zoneId.getDisplayName(TextStyle.FULL, Locale.getDefault()));
@@ -108,7 +107,7 @@ public class UidSpringBootStarterApplicationTests {
                 long endId = defaultUidGenerator.getEndHistoryUIDOfEndSequence(epochMilli2);
                 String parsedEndId = defaultUidGenerator.parseUID(endId);
 
-                System.out.println(year + " " + " " + monthStr + " " + beginId + " " + endId+" "+parsedBeginId+" "+parsedEndId);
+                System.out.println(year + " " + " " + monthStr + " " + beginId + " " + endId+" " + parsedBeginId+" "+parsedEndId);
             }
         }
 
