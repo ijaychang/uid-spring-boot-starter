@@ -9,6 +9,7 @@ import com.zcckj.uid.utils.InetUtilsProperties;
 import com.zcckj.uid.worker.DisposableWorkerIdAssigner;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -48,6 +49,9 @@ public class UIDGeneratorAutoConfiguration {
 
     private InetUtils inetUtils;
 
+    @Value("${server.port}")
+    private int servicePort;
+
 	@Autowired
 	public UIDGeneratorAutoConfiguration(UIDGeneratorProperties uidGeneratorProperties,InetUtilsProperties inetUtilsProperties) {
 		this.uidGeneratorProperties = uidGeneratorProperties;
@@ -62,7 +66,7 @@ public class UIDGeneratorAutoConfiguration {
 	public UidGenerator createUidGenerator() {
 		DisposableWorkerIdAssigner disposableWorkerIdAssigner = new DisposableWorkerIdAssigner();
 		disposableWorkerIdAssigner.setZookeeperConnection(uidGeneratorProperties.getZookeeperConnection());
-        disposableWorkerIdAssigner.setServicePort(uidGeneratorProperties.getServicePort());
+        disposableWorkerIdAssigner.setServicePort(servicePort);
 
         // 未指定服务IP地址则使用inetUtils获取
         if(StringUtils.isBlank(disposableWorkerIdAssigner.getServiceIp())) {

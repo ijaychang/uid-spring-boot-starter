@@ -5,6 +5,7 @@ uid:
   zookeeperConnection: 171.188.0.161:2181
   type: cached
   epochStr: 2014-12-31
-  inetutils:
+  serviceIp:
     preferred-networks: 10.1.80
-  service-port: 8080
+server:
+  port: 8084

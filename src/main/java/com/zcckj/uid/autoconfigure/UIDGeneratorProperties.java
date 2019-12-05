@@ -35,9 +35,6 @@ public class UIDGeneratorProperties {
 	/** zookeeper address */
 	private String zookeeperConnection = "localhost:2181";
 
-    /** servicePort */
-	private int servicePort = 8080;
-
 	/** UID Generator Type */
 	private UIDGeneratorType type = UIDGeneratorType.DEFAULT;
 

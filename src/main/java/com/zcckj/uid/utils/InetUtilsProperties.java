@@ -34,7 +34,7 @@ public class InetUtilsProperties {
 	/**
 	 * Prefix for the Inet Utils properties.
 	 */
-	public static final String PREFIX = "uid.inetutils";
+	public static final String PREFIX = "uid.serviceIp";
 
 	/**
 	 * The default hostname. Used in case of errors.

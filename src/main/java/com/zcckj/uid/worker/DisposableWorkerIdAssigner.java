@@ -1,22 +1,15 @@
 package com.zcckj.uid.worker;
 
-import com.zcckj.uid.utils.NetUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.util.Properties;
 
 /**
  * Represents an implementation of {@link WorkerIdAssigner}, 
@@ -26,18 +19,17 @@ import java.util.Properties;
  */
 public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
     public static final String UID_NAMESPACE = "uid-generator";
+    /** 用于分配workId*/
 	public static final String SEQ_ZNODE = "/workId/sequence";
+	/** 用于存储服务IP-服务端口对应的workId值*/
     public static final String STORAGE_ZNODE = "/workId/storage";
+
 	public static final int SESSION_TIMEOUT = 5000;
 	public static final int CONNECTION_TIMEOUT = 5000;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(DisposableWorkerIdAssigner.class);
+
 	private String zookeeperConnection;
-
-    private final String USER_HOME_DIR_KEY_NAME = "user.home";
-
-    private final String WORK_ID_KEY_NAME = "workId";
-
-    private final String WORK_ID_CACHE_PROPERITES_FILE_PATH_PREFIX = System.getProperty(USER_HOME_DIR_KEY_NAME)+"/uid-work-id-";
 
     /** 业务服务提供服务的IP地址*/
     private String serviceIp;
@@ -62,40 +54,28 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
 
 
 	public long znodeSeq() {
+        Assert.isTrue(servicePort != 0,"servicePort must be assign");
 		RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
 		CuratorFramework client = CuratorFrameworkFactory.builder().connectString(this.zookeeperConnection)
 				.sessionTimeoutMs(SESSION_TIMEOUT).connectionTimeoutMs(CONNECTION_TIMEOUT).retryPolicy(retryPolicy)
 				.namespace(UID_NAMESPACE).build();
 		client.start();
 		try {
-            File wordIdCacheFile = new File(WORK_ID_CACHE_PROPERITES_FILE_PATH_PREFIX+getServiceIp().replace(":","+")+".properties");
-            if(!wordIdCacheFile.exists()){
-                File userHomeDir = new File(System.getProperty(USER_HOME_DIR_KEY_NAME));
-                if(!userHomeDir.exists()){
-                    userHomeDir.mkdirs();
-                }
-                if(!wordIdCacheFile.exists()){
-                    wordIdCacheFile.createNewFile();
-                }
-
-                Assert.isTrue(servicePort != 0,"servicePort must be assign");
-                // 持久顺序节点 IP:PORT-
-                String path = SEQ_ZNODE+"/"+ getServiceIp() +"-";
-                String seqNodepath = client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT_SEQUENTIAL)
-                        .forPath(path);
-                String workIdStr = seqNodepath.split("-")[1];
-                Properties workIdProperties = PropertiesLoaderUtils.loadProperties(new FileSystemResource(wordIdCacheFile));
-                workIdProperties.setProperty(WORK_ID_KEY_NAME,workIdStr);
-                try(OutputStream outputStream = new FileOutputStream(wordIdCacheFile);) {
-                    workIdProperties.store(outputStream,"workId cache in this file");
-                }
-                return Long.parseLong(workIdStr);
+		    final String serviceIpPort = getServiceIp()+"#"+servicePort;
+            final String storagePath = STORAGE_ZNODE + "/" + serviceIpPort;
+            final String sequencePathPrefix = SEQ_ZNODE+"/"+ serviceIpPort + "-";
+		    // 先检查服务IP+服务端口号节点是否存在
+            Stat stat = client.checkExists().creatingParentsIfNeeded().forPath(storagePath);
+            if(stat != null){
+                byte[] bytes = client.getData().forPath(storagePath);
+                long workId = Long.parseLong(new String(bytes));
+                return workId;
             }
-
-            Properties workIdProperties = PropertiesLoaderUtils.loadProperties(new FileSystemResource(wordIdCacheFile));
-            String workIdStr = workIdProperties.getProperty(WORK_ID_KEY_NAME);
-			Assert.isTrue(StringUtils.isNotBlank(workIdStr),"workId not exists in "+wordIdCacheFile.getAbsolutePath());
-            return Long.parseLong(workIdStr);
+            String sequenceNodePath = client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT_SEQUENTIAL).forPath(sequencePathPrefix);
+            String workIdStr = sequenceNodePath.split("-")[1];
+            long workId = Long.parseLong(workIdStr);
+            client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(storagePath,String.valueOf(workId).getBytes());
+            return workId;
 		} catch (Exception e) {
 		    throw new RuntimeException(e);
 		} finally {
@@ -106,10 +86,6 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
 	public void setZookeeperConnection(String zookeeperConnection) {
 		this.zookeeperConnection = zookeeperConnection;
 	}
-
-    public int getServicePort() {
-        return servicePort;
-    }
 
     public void setServicePort(int servicePort) {
         this.servicePort = servicePort;
