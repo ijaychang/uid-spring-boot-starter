@@ -38,7 +38,7 @@ uid:
 server:
   port: 8084
 ```
-以上配置timeBits:34，epochStr:2014-12-31，可以用499年,理论上一个服务实例每秒可生成4096个id
+以上配置timeBits:34，epochStr:2014-12-31，可以用499年,理论上一个服务实例每秒可生成4096个id，兼顾了id容量，并发，以及workId重复利用的问题
 ## workId分配的思路
 
 workId的分配是根据服务的IP#PORT来的，如果之前在zookeeper中有分配过，会使用已经分配过的workId,未分配过那么会使用zookeeper的持久顺序节点生成一个节点(路径为/uid-generator/workId/sequence/服务IP#服务PORT-数字序列)，
