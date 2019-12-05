@@ -1,5 +1,6 @@
 package com.zcckj.uid;
 
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import com.zcckj.uid.impl.DefaultUidGenerator;
 import com.zcckj.uid.worker.DisposableWorkerIdAssigner;
 import org.junit.Test;
@@ -21,6 +22,19 @@ public class UidSpringBootStarterApplicationTests {
     DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     DateTimeFormatter YEAR_MONTH_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
+
+
+    @Test
+    public void test00(){
+        LocalDateTime localDateTime1 = LocalDateTime.parse("2019-01-01 00:00:00", DATE_TIME_FORMATTER);
+        System.out.println(localDateTime1.atZone(ZoneId.systemDefault()).toInstant()
+                .toEpochMilli());
+        LocalDateTime localDateTime2 = LocalDateTime.parse("2019-11-31 23:59:59", DATE_TIME_FORMATTER);
+
+        System.out.println(localDateTime2.atZone(ZoneId.systemDefault()).toInstant()
+                .toEpochMilli());
+    }
+
 
     @Test
     public void test0() {

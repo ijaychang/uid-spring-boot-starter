@@ -1,7 +1,10 @@
 uid:
-  timeBits: 23
-  workerBits: 31
-  seqBits: 9
+  timeBits: 32
+  workerBits: 21
+  seqBits: 10
   zookeeperConnection: 171.188.0.161:2181
   type: cached
-  epochStr: 2018-10-19
+  epochStr: 2014-12-31
+  inetutils:
+    preferred-networks: 10.1.80
+  service-port: 8080

@@ -37,6 +37,9 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
 
     private final String WORK_ID_CACHE_PROPERITES_FILE_PATH_PREFIX = System.getProperty(USER_HOME_DIR_KEY_NAME)+"/uid-work-id-";
 
+    /** 业务服务提供服务的IP地址*/
+    private String serviceIp;
+
     /** 业务服务提供服务的端口号*/
 	private int servicePort;
 
@@ -109,5 +112,13 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
 
     public void setServicePort(int servicePort) {
         this.servicePort = servicePort;
+    }
+
+    public String getServiceIp() {
+        return serviceIp;
+    }
+
+    public void setServiceIp(String serviceIp) {
+        this.serviceIp = serviceIp;
     }
 }
