@@ -25,7 +25,9 @@ import java.util.Properties;
  * @author fsren
  */
 public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
-	public static final String SEQ_ZNODE = "/workId";
+    public static final String UID_NAMESPACE = "uid-generator";
+	public static final String SEQ_ZNODE = "/workId/sequence";
+    public static final String STORAGE_ZNODE = "/workId/storage";
 	public static final int SESSION_TIMEOUT = 5000;
 	public static final int CONNECTION_TIMEOUT = 5000;
 	private static final Logger LOGGER = LoggerFactory.getLogger(DisposableWorkerIdAssigner.class);
@@ -63,11 +65,10 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
 		RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
 		CuratorFramework client = CuratorFrameworkFactory.builder().connectString(this.zookeeperConnection)
 				.sessionTimeoutMs(SESSION_TIMEOUT).connectionTimeoutMs(CONNECTION_TIMEOUT).retryPolicy(retryPolicy)
-				.namespace("uid-generator").build();
+				.namespace(UID_NAMESPACE).build();
 		client.start();
-        String ipPort = NetUtils.getLocalAddress()+":"+servicePort;
 		try {
-            File wordIdCacheFile = new File(WORK_ID_CACHE_PROPERITES_FILE_PATH_PREFIX+ipPort.replace(":","+")+".properties");
+            File wordIdCacheFile = new File(WORK_ID_CACHE_PROPERITES_FILE_PATH_PREFIX+getServiceIp().replace(":","+")+".properties");
             if(!wordIdCacheFile.exists()){
                 File userHomeDir = new File(System.getProperty(USER_HOME_DIR_KEY_NAME));
                 if(!userHomeDir.exists()){
@@ -79,7 +80,7 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
 
                 Assert.isTrue(servicePort != 0,"servicePort must be assign");
                 // 持久顺序节点 IP:PORT-
-                String path = SEQ_ZNODE+"/"+ ipPort +"-";
+                String path = SEQ_ZNODE+"/"+ getServiceIp() +"-";
                 String seqNodepath = client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT_SEQUENTIAL)
                         .forPath(path);
                 String workIdStr = seqNodepath.split("-")[1];
