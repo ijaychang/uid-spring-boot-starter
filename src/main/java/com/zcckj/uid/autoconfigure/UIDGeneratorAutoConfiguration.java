@@ -5,7 +5,6 @@ import com.zcckj.uid.annotation.EnableUID;
 import com.zcckj.uid.impl.CachedUidGenerator;
 import com.zcckj.uid.impl.DefaultUidGenerator;
 import com.zcckj.uid.utils.InetUtils;
-import com.zcckj.uid.utils.InetUtilsProperties;
 import com.zcckj.uid.worker.DisposableWorkerIdAssigner;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +69,11 @@ public class UIDGeneratorAutoConfiguration {
 
         // 未指定服务IP地址则使用inetUtils获取
         if(StringUtils.isBlank(disposableWorkerIdAssigner.getServiceIp())) {
-            disposableWorkerIdAssigner.setServiceIp(inetUtils.findFirstNonLoopbackAddress().getHostAddress());
+            if(StringUtils.isNotBlank(inetUtilsProperties.getDefaultIpAddress())){
+                disposableWorkerIdAssigner.setServiceIp(inetUtilsProperties.getDefaultIpAddress());
+            }else {
+                disposableWorkerIdAssigner.setServiceIp(inetUtils.findFirstNonLoopbackAddress().getHostAddress());
+            }
         }
 
 		DefaultUidGenerator defaultUidGenerator = new DefaultUidGenerator();

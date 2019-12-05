@@ -18,14 +18,14 @@ import org.springframework.util.Assert;
  * @author fsren
  */
 public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
-    public static final String UID_NAMESPACE = "uid-generator";
+    private static final String UID_NAMESPACE = "uid-generator";
     /** 用于分配workId*/
-	public static final String SEQ_ZNODE = "/workId/sequence";
+    private static final String SEQ_ZNODE = "/workId/sequence";
 	/** 用于存储服务IP-服务端口对应的workId值*/
-    public static final String STORAGE_ZNODE = "/workId/storage";
+    private static final String STORAGE_ZNODE = "/workId/storage";
 
-	public static final int SESSION_TIMEOUT = 5000;
-	public static final int CONNECTION_TIMEOUT = 5000;
+    private static final int SESSION_TIMEOUT = 5000;
+    private static final int CONNECTION_TIMEOUT = 5000;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DisposableWorkerIdAssigner.class);
 

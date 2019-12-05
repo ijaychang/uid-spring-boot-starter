@@ -11,6 +11,7 @@ import java.util.Enumeration;
  * 
  * @author fsren
  */
+@Deprecated
 public abstract class NetUtils {
 
     /**

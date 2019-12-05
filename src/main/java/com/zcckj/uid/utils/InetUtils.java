@@ -16,6 +16,7 @@
 
 package com.zcckj.uid.utils;
 
+import com.zcckj.uid.autoconfigure.InetUtilsProperties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,13 +26,10 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Spencer Gibb
@@ -58,17 +56,6 @@ public class InetUtils implements Closeable {
 	@Override
 	public void close() {
 		this.executorService.shutdown();
-	}
-
-	public HostInfo findFirstNonLoopbackHostInfo() {
-		InetAddress address = findFirstNonLoopbackAddress();
-		if (address != null) {
-			return convertAddress(address);
-		}
-		HostInfo hostInfo = new HostInfo();
-		hostInfo.setHostname(this.properties.getDefaultHostname());
-		hostInfo.setIpAddress(this.properties.getDefaultIpAddress());
-		return hostInfo;
 	}
 
 	public InetAddress findFirstNonLoopbackAddress() {
@@ -158,85 +145,6 @@ public class InetUtils implements Closeable {
 			}
 		}
 		return false;
-	}
-
-	public HostInfo convertAddress(final InetAddress address) {
-		HostInfo hostInfo = new HostInfo();
-		Future<String> result = this.executorService.submit(address::getHostName);
-
-		String hostname;
-		try {
-			hostname = result.get(this.properties.getTimeoutSeconds(), TimeUnit.SECONDS);
-		}
-		catch (Exception e) {
-			this.log.info("Cannot determine local hostname");
-			hostname = "localhost";
-		}
-		hostInfo.setHostname(hostname);
-		hostInfo.setIpAddress(address.getHostAddress());
-		return hostInfo;
-	}
-
-	/**
-	 * Host information pojo.
-	 */
-	public static class HostInfo {
-
-		/**
-		 * Should override the host info.
-		 */
-		public boolean override;
-
-		private String ipAddress;
-
-		private String hostname;
-
-		public HostInfo(String hostname) {
-			this.hostname = hostname;
-		}
-
-		public HostInfo() {
-		}
-
-		public int getIpAddressAsInt() {
-			InetAddress inetAddress = null;
-			String host = this.ipAddress;
-			if (host == null) {
-				host = this.hostname;
-			}
-			try {
-				inetAddress = InetAddress.getByName(host);
-			}
-			catch (final UnknownHostException e) {
-				throw new IllegalArgumentException(e);
-			}
-			return ByteBuffer.wrap(inetAddress.getAddress()).getInt();
-		}
-
-		public boolean isOverride() {
-			return this.override;
-		}
-
-		public void setOverride(boolean override) {
-			this.override = override;
-		}
-
-		public String getIpAddress() {
-			return this.ipAddress;
-		}
-
-		public void setIpAddress(String ipAddress) {
-			this.ipAddress = ipAddress;
-		}
-
-		public String getHostname() {
-			return this.hostname;
-		}
-
-		public void setHostname(String hostname) {
-			this.hostname = hostname;
-		}
-
 	}
 
 }

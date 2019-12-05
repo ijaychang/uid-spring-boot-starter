@@ -1,11 +1,10 @@
 package com.zcckj.uid.utils;
 
+import com.zcckj.uid.autoconfigure.InetUtilsProperties;
 import org.junit.Test;
 
 import java.net.InetAddress;
 import java.util.Arrays;
-
-import static org.junit.Assert.*;
 
 /**
  *
