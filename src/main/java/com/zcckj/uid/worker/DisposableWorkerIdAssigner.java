@@ -14,6 +14,8 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -60,9 +62,10 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
         Assert.isTrue(servicePort != 0, "servicePort must be assign");
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
 
-        try (CuratorFramework client = CuratorFrameworkFactory.builder().connectString(this.zookeeperConnection)
-                .sessionTimeoutMs(SESSION_TIMEOUT).connectionTimeoutMs(CONNECTION_TIMEOUT).retryPolicy(retryPolicy)
-                .namespace(UID_NAMESPACE).build();) {
+        try {
+            final CuratorFramework client = CuratorFrameworkFactory.builder().connectString(this.zookeeperConnection)
+                    .sessionTimeoutMs(SESSION_TIMEOUT).connectionTimeoutMs(CONNECTION_TIMEOUT).retryPolicy(retryPolicy)
+                    .namespace(UID_NAMESPACE).build();
             client.start();
             final String serviceIpPort = serviceIp + "#" + servicePort;
             final String sequencePathPrefix = SEQ_ZNODE + "/" + serviceIpPort + "-";
@@ -88,9 +91,30 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
             }
 
             String workIdStr = sequenceNodePath.split("-")[1];
+            // 定时上报服务最新的时间(更新上报时间戳)
+            scheduledUploadData(client,sequenceNodePath);
+            // 注册shutdown钩子
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> client.close()));
             return Long.parseLong(workIdStr);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @SuppressWarnings("AlibabaThreadPoolCreation")
+    private void scheduledUploadData(CuratorFramework client, String sequenceNodePath) {
+        // 每3s上报当前节点的时间
+        new ScheduledThreadPoolExecutor(1, r -> {
+            Thread thread = new Thread(r, "uid-schedule-upload-time");
+            thread.setDaemon(true);
+            return thread;
+        }).scheduleAtFixedRate(() -> updateNewData(client, sequenceNodePath),1,3L,TimeUnit.SECONDS);
+    }
+
+    private void updateNewData(CuratorFramework client, String sequenceNodePath) {
+        try {
+            client.setData().forPath(sequenceNodePath, String.valueOf(System.currentTimeMillis()).getBytes());
+        } catch (Exception e) {
         }
     }
 
@@ -102,6 +126,7 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
         // 检查当前时间戳秒数是否大于等于存储在sequenceNodePath的秒数
         byte[] bytes = client.getData().forPath(sequenceNodePath);
         long timeMillisStoreInSeqNode = Long.parseLong(new String(bytes));
+        // 该节点的时间不能小于最后一次上报的时间
         if(System.currentTimeMillis() < timeMillisStoreInSeqNode){
             throw new RuntimeException("Current timeMillis should bigger than timeMillisStoreInSeqNode");
         }

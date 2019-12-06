@@ -20,11 +20,12 @@ public class SpringBootStarterApplicationTest implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        for(int j = 0 ; j < 2 ; j ++){
+        for(int j = 0 ; j < 10 ; j ++){
             long begin = System.currentTimeMillis();
-            for (int i = 0; i < 1; i++) {
+            for (int i = 0; i < 500; i++) {
                 long uid = uidGenerator.getUID();
                 System.out.println(uid);
+                Thread.sleep(50L);
             }
             System.out.println(System.currentTimeMillis() - begin);
         }
