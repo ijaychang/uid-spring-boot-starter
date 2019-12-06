@@ -13,10 +13,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 /**
  * @auther: fsren
@@ -47,10 +45,7 @@ public class UIDGeneratorAutoConfiguration{
      */
     private InetUtilsProperties inetUtilsProperties;
 
-
     private InetUtils inetUtils;
-
-    private Environment environment;
 
     @Value("${server.port:8080}")
     private int servicePort;
