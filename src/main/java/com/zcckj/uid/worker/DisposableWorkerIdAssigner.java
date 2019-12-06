@@ -60,14 +60,12 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
         Assert.isTrue(servicePort != 0, "servicePort must be assign");
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
 
-
         try (CuratorFramework client = CuratorFrameworkFactory.builder().connectString(this.zookeeperConnection)
                 .sessionTimeoutMs(SESSION_TIMEOUT).connectionTimeoutMs(CONNECTION_TIMEOUT).retryPolicy(retryPolicy)
                 .namespace(UID_NAMESPACE).build();) {
             client.start();
             final String serviceIpPort = serviceIp + "#" + servicePort;
             final String sequencePathPrefix = SEQ_ZNODE + "/" + serviceIpPort + "-";
-            // 先检查服务IP+服务端口号节点是否存在
             Stat stat = client.checkExists().creatingParentsIfNeeded().forPath(SEQ_ZNODE);
             String sequenceNodePath = null;
             if (stat == null) {
@@ -77,16 +75,18 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
                 if (CollectionUtils.isEmpty(seqNodePaths)) {
                     sequenceNodePath = createPersistentSequenceNode(client, sequencePathPrefix);
                 } else {
-                    Map<String, String> ipPortAndWorkIdMap = seqNodePaths.parallelStream().collect(Collectors
+                    Map<String, String> serviceIpPortAndWorkIdMap = seqNodePaths.parallelStream().collect(Collectors
                             .toMap(seqNodePath -> transfer(seqNodePath, 0), seqNodePath -> transfer(seqNodePath, 1)));
-                    String workIdStr = ipPortAndWorkIdMap.get(serviceIpPort);
+                    String workIdStr = serviceIpPortAndWorkIdMap.get(serviceIpPort);
                     if (StringUtils.isEmpty(workIdStr)) {
                         sequenceNodePath = createPersistentSequenceNode(client, sequencePathPrefix);
                     } else {
-                        sequenceNodePath = serviceIpPort + "-" + workIdStr;
+                        sequenceNodePath = sequencePathPrefix + workIdStr;
+                        checkTimeMillisIsValid(client,sequenceNodePath);
                     }
                 }
             }
+
             String workIdStr = sequenceNodePath.split("-")[1];
             return Long.parseLong(workIdStr);
         } catch (Exception e) {
@@ -98,9 +98,18 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
         return sourceStr.split("-")[index];
     }
 
+    private void checkTimeMillisIsValid(CuratorFramework client,String sequenceNodePath) throws Exception {
+        // 检查当前时间戳秒数是否大于等于存储在sequenceNodePath的秒数
+        byte[] bytes = client.getData().forPath(sequenceNodePath);
+        long timeMillisStoreInSeqNode = Long.parseLong(new String(bytes));
+        if(System.currentTimeMillis() < timeMillisStoreInSeqNode){
+            throw new RuntimeException("Current timeMillis should bigger than timeMillisStoreInSeqNode");
+        }
+    }
+
     private String createPersistentSequenceNode(CuratorFramework client, String sequencePathPrefix) throws Exception {
         return client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT_SEQUENTIAL)
-                .forPath(sequencePathPrefix);
+                .forPath(sequencePathPrefix, String.valueOf(System.currentTimeMillis()).getBytes());
     }
 
     public void setZookeeperConnection(String zookeeperConnection) {
