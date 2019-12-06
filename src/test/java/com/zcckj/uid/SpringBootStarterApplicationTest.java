@@ -22,7 +22,7 @@ public class SpringBootStarterApplicationTest implements CommandLineRunner {
     public void run(String... args) throws Exception {
         for(int j = 0 ; j < 2 ; j ++){
             long begin = System.currentTimeMillis();
-            for (int i = 0; i < 4096; i++) {
+            for (int i = 0; i < 1; i++) {
                 long uid = uidGenerator.getUID();
                 System.out.println(uid);
             }

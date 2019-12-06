@@ -7,6 +7,6 @@ uid:
   epochStr: 2014-12-31
   service-ip:
     preferred-networks: 10.1.80
-    default-ip-address: 10.1.80.77
-server:
-  port: 8084
+    #default-ip-address: 10.1.80.77
+#server:
+#  port: 8084

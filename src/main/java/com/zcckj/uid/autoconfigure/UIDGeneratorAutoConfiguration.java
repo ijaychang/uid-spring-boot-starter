@@ -13,8 +13,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 /**
  * @auther: fsren
@@ -31,14 +33,14 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConditionalOnBean(annotation = EnableUID.class)
-@EnableConfigurationProperties({UIDGeneratorProperties.class,InetUtilsProperties.class})
+@EnableConfigurationProperties({UIDGeneratorProperties.class, InetUtilsProperties.class})
 @ConditionalOnClass(UidGenerator.class)
-public class UIDGeneratorAutoConfiguration {
+public class UIDGeneratorAutoConfiguration{
 
-	/**
-	 * 自定义配置
-	 */
-	private UIDGeneratorProperties uidGeneratorProperties;
+    /**
+     * 自定义配置
+     */
+    private UIDGeneratorProperties uidGeneratorProperties;
 
     /**
      * 自定义配置
@@ -48,44 +50,47 @@ public class UIDGeneratorAutoConfiguration {
 
     private InetUtils inetUtils;
 
-    @Value("${server.port}")
+    private Environment environment;
+
+    @Value("${server.port:8080}")
     private int servicePort;
 
-	@Autowired
-	public UIDGeneratorAutoConfiguration(UIDGeneratorProperties uidGeneratorProperties,InetUtilsProperties inetUtilsProperties) {
-		this.uidGeneratorProperties = uidGeneratorProperties;
-		this.inetUtilsProperties = inetUtilsProperties;
+    private static final String LOCAL_LOOP_BACK_IP = "127.0.0.1";
+
+    @Autowired
+    public UIDGeneratorAutoConfiguration(UIDGeneratorProperties uidGeneratorProperties,
+            InetUtilsProperties inetUtilsProperties) {
+        this.uidGeneratorProperties = uidGeneratorProperties;
+        this.inetUtilsProperties = inetUtilsProperties;
         inetUtils = new InetUtils(inetUtilsProperties);
-	}
+    }
 
-
-
-	@Bean
+    @Bean
     @ConditionalOnMissingBean
-	public UidGenerator createUidGenerator() {
-		DisposableWorkerIdAssigner disposableWorkerIdAssigner = new DisposableWorkerIdAssigner();
-		disposableWorkerIdAssigner.setZookeeperConnection(uidGeneratorProperties.getZookeeperConnection());
+    public UidGenerator createUidGenerator() {
+        DisposableWorkerIdAssigner disposableWorkerIdAssigner = new DisposableWorkerIdAssigner();
+        disposableWorkerIdAssigner.setZookeeperConnection(uidGeneratorProperties.getZookeeperConnection());
         disposableWorkerIdAssigner.setServicePort(servicePort);
 
         // 未指定服务IP地址则使用inetUtils获取
-        if(StringUtils.isBlank(disposableWorkerIdAssigner.getServiceIp())) {
-            if(StringUtils.isNotBlank(inetUtilsProperties.getDefaultIpAddress())){
+        if (StringUtils.isBlank(disposableWorkerIdAssigner.getServiceIp())) {
+            String defaultIpAddress = inetUtilsProperties.getDefaultIpAddress();
+            if (StringUtils.isNotBlank(defaultIpAddress) && !LOCAL_LOOP_BACK_IP.equals(defaultIpAddress)) {
                 disposableWorkerIdAssigner.setServiceIp(inetUtilsProperties.getDefaultIpAddress());
-            }else {
+            } else {
                 disposableWorkerIdAssigner.setServiceIp(inetUtils.findFirstNonLoopbackAddress().getHostAddress());
             }
         }
 
-		DefaultUidGenerator defaultUidGenerator = new DefaultUidGenerator();
-		if (uidGeneratorProperties.getType() == UIDGeneratorType.CACHED) {
-			defaultUidGenerator = new CachedUidGenerator();
-		}
-		defaultUidGenerator.setSeqBits(uidGeneratorProperties.getSeqBits());
-		defaultUidGenerator.setTimeBits(uidGeneratorProperties.getTimeBits());
-		defaultUidGenerator.setWorkerBits(uidGeneratorProperties.getWorkerBits());
-		defaultUidGenerator.setEpochStr(uidGeneratorProperties.getEpochStr());
-		defaultUidGenerator.setWorkerIdAssigner(disposableWorkerIdAssigner);
-		return defaultUidGenerator;
-	}
-
+        DefaultUidGenerator defaultUidGenerator = new DefaultUidGenerator();
+        if (uidGeneratorProperties.getType() == UIDGeneratorType.CACHED) {
+            defaultUidGenerator = new CachedUidGenerator();
+        }
+        defaultUidGenerator.setSeqBits(uidGeneratorProperties.getSeqBits());
+        defaultUidGenerator.setTimeBits(uidGeneratorProperties.getTimeBits());
+        defaultUidGenerator.setWorkerBits(uidGeneratorProperties.getWorkerBits());
+        defaultUidGenerator.setEpochStr(uidGeneratorProperties.getEpochStr());
+        defaultUidGenerator.setWorkerIdAssigner(disposableWorkerIdAssigner);
+        return defaultUidGenerator;
+    }
 }

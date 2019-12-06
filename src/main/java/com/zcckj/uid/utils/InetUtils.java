@@ -28,16 +28,11 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @author Spencer Gibb
  */
 public class InetUtils implements Closeable {
-
-	// TODO: maybe shutdown the thread pool if it isn't being used?
-	private final ExecutorService executorService;
 
 	private final InetUtilsProperties properties;
 
@@ -45,17 +40,10 @@ public class InetUtils implements Closeable {
 
 	public InetUtils(final InetUtilsProperties properties) {
 		this.properties = properties;
-		this.executorService = Executors.newSingleThreadExecutor(r -> {
-			Thread thread = new Thread(r);
-			thread.setName(InetUtilsProperties.PREFIX);
-			thread.setDaemon(true);
-			return thread;
-		});
 	}
 
 	@Override
 	public void close() {
-		this.executorService.shutdown();
 	}
 
 	public InetAddress findFirstNonLoopbackAddress() {
