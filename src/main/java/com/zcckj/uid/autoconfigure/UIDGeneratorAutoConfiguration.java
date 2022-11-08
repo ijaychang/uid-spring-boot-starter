@@ -1,10 +1,13 @@
 package com.zcckj.uid.autoconfigure;
 
+import com.zcckj.uid.BizidGenerator;
 import com.zcckj.uid.UidGenerator;
 import com.zcckj.uid.annotation.EnableUID;
 import com.zcckj.uid.impl.CachedUidGenerator;
+import com.zcckj.uid.impl.DefaultBizidGenerator;
 import com.zcckj.uid.impl.DefaultUidGenerator;
 import com.zcckj.uid.utils.InetUtils;
+import com.zcckj.uid.worker.BizidWorkerIdAssigner;
 import com.zcckj.uid.worker.DisposableWorkerIdAssigner;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +35,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConditionalOnBean(annotation = EnableUID.class)
 @EnableConfigurationProperties({UIDGeneratorProperties.class, InetUtilsProperties.class})
-@ConditionalOnClass(UidGenerator.class)
+@ConditionalOnClass({UidGenerator.class,BizidGenerator.class})
 public class UIDGeneratorAutoConfiguration{
 
     /**
@@ -87,5 +90,28 @@ public class UIDGeneratorAutoConfiguration{
         defaultUidGenerator.setEpochStr(uidGeneratorProperties.getEpochStr());
         defaultUidGenerator.setWorkerIdAssigner(disposableWorkerIdAssigner);
         return defaultUidGenerator;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public BizidGenerator createBizidGenerator() {
+        BizidWorkerIdAssigner bizidWorkerIdAssigner = new BizidWorkerIdAssigner();
+        bizidWorkerIdAssigner.setZookeeperConnection(uidGeneratorProperties.getZookeeperConnection());
+        bizidWorkerIdAssigner.setServicePort(servicePort);
+
+        // 未指定服务IP地址则使用inetUtils获取
+        if (StringUtils.isBlank(bizidWorkerIdAssigner.getServiceIp())) {
+            String defaultIpAddress = inetUtilsProperties.getDefaultIpAddress();
+            if (StringUtils.isNotBlank(defaultIpAddress) && !LOCAL_LOOP_BACK_IP.equals(defaultIpAddress)) {
+                bizidWorkerIdAssigner.setServiceIp(inetUtilsProperties.getDefaultIpAddress());
+            } else {
+                bizidWorkerIdAssigner.setServiceIp(inetUtils.findFirstNonLoopbackAddress().getHostAddress());
+            }
+        }
+
+        DefaultBizidGenerator bizidGenerator = new DefaultBizidGenerator();
+
+        bizidGenerator.setWorkerIdAssigner(bizidWorkerIdAssigner);
+        return bizidGenerator;
     }
 }
