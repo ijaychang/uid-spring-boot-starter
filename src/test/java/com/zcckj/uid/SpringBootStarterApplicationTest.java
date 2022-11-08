@@ -27,8 +27,9 @@ public class SpringBootStarterApplicationTest implements CommandLineRunner {
             long begin = System.currentTimeMillis();
             for (int i = 0; i < 500; i++) {
                 //long uid = uidGenerator.getUID();
-                String uid = bizidGenerator.getUID("ZX");
+                String uid = bizidGenerator.getUID();
                 System.out.println(uid);
+                System.out.println(bizidGenerator.parseUID(uid));
                 Thread.sleep(50L);
             }
             System.out.println(System.currentTimeMillis() - begin);

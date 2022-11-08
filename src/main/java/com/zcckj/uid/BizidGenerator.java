@@ -21,15 +21,6 @@ public interface BizidGenerator {
     String getUID() throws UidGenerateException;
 
     /**
-     * Get a unique ID
-     *
-     * @param bizPrefix 业务前缀标识
-     * @return UID
-     * @throws UidGenerateException
-     */
-    String getUID(String bizPrefix) throws UidGenerateException;
-
-    /**
      * Parse the UID into elements which are used to generate the UID. <br>
      * Such as timestamp & workerId & sequence...
      *

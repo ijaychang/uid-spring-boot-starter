@@ -18,7 +18,7 @@ import java.util.Random;
 public class DefaultBizidGenerator implements BizidGenerator, InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBizidGenerator.class);
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     /**
      * Spring property
@@ -35,17 +35,16 @@ public class DefaultBizidGenerator implements BizidGenerator, InitializingBean {
 
     @Override
     public String getUID() throws UidGenerateException {
-        return getUID("");
-    }
-
-    @Override
-    public String getUID(String bizPrefix) throws UidGenerateException {
-        return String.format("%s%07d%06d", LocalDateTime.now().format(DATE_TIME_FORMATTER), workerId, RandomUtils.nextInt(0, 1000000));
+        return String.format("%s%06d%06d", LocalDateTime.now().format(DATE_TIME_FORMATTER), workerId, RandomUtils.nextInt(0, 1000000));
     }
 
     @Override
     public String parseUID(String uid) {
-        return null;
+        // format as string
+        String datetime = uid.substring(0, 14);
+        String random = uid.substring(20, 26);
+        return String.format("{\"UID\":\"%s\",\"dateTime\":\"%s\",\"workerId\":\"%06d\",\"random\":\"%s\"}",
+                uid, datetime, workerId, random);
     }
 
     @Override

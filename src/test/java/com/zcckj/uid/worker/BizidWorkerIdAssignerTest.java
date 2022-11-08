@@ -23,12 +23,4 @@ public class BizidWorkerIdAssignerTest {
         System.out.println(workId);
     }
 
-    @Test
-    public void assignWorkerId2() {
-        for (int i = 0 ; i < 10000 ; i ++) {
-            String uid = bizidGenerator.getUID("ZX");
-            System.out.println(uid);
-        }
-
-    }
 }
