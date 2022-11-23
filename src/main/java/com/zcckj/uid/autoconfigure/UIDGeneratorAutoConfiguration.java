@@ -68,6 +68,10 @@ public class UIDGeneratorAutoConfiguration{
     public UidGenerator createUidGenerator() {
         DisposableWorkerIdAssigner disposableWorkerIdAssigner = new DisposableWorkerIdAssigner();
         disposableWorkerIdAssigner.setZookeeperConnection(uidGeneratorProperties.getZookeeperConnection());
+        // 单元测试时serverPort时-1此时会影响zk的持久有序节点key名的判断，故这里将-1改为99999
+        if (this.servicePort == -1) {
+            this.servicePort = 99999;
+        }
         disposableWorkerIdAssigner.setServicePort(servicePort);
 
         // 未指定服务IP地址则使用inetUtils获取
