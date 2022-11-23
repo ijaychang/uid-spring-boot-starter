@@ -101,6 +101,9 @@ public class UIDGeneratorAutoConfiguration{
     public BizidGenerator createBizidGenerator() {
         BizidWorkerIdAssigner bizidWorkerIdAssigner = new BizidWorkerIdAssigner();
         bizidWorkerIdAssigner.setZookeeperConnection(uidGeneratorProperties.getZookeeperConnection());
+        if (this.servicePort == -1) {
+            this.servicePort = 99999;
+        }
         bizidWorkerIdAssigner.setServicePort(servicePort);
 
         // 未指定服务IP地址则使用inetUtils获取
