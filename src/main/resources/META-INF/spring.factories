@@ -1,2 +1,2 @@
 # Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.zcckj.uid.autoconfigure.UIDGeneratorAutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=cn.jaychang.uid.autoconfigure.UIDGeneratorAutoConfiguration
