@@ -1,5 +1,5 @@
 ﻿# 分布式ID生成工具
-
+基于Baidu Uid 封装成　spring boot starter
 ## UID添加到项目中
 1. 添加依赖
 ```xml
