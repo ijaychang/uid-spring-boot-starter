@@ -4,9 +4,9 @@
 1. 添加依赖
 ```xml
     <dependency>
-      <groupId>com.zcckj.uid</groupId>
+      <groupId>cn.jaychang</groupId>
       <artifactId>uid-spring-boot-starter</artifactId>
-      <version>1.1.0</version>
+      <version>1.0.0</version>
     </dependency>
 ```
 
