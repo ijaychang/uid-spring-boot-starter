@@ -8,26 +8,66 @@
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>uid-spring-boot-starter</name>
-    <description>uid-generator</description>
+    <name>Uid Spring Boot Starter</name>
+    <description>Uid Spring Boot Starter</description>
+    <url>https://github.com/jaychang9/uid-spring-boot-starter</url>
 
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
+        <zookeeper.version>3.4.14</zookeeper.version>
+        <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
+        <!-- Maven plugins -->
+        <maven.compiler.version>3.8.1</maven.compiler.version>
+        <maven.source.version>3.2.1</maven.source.version>
+        <maven.javadoc.version>2.9.1</maven.javadoc.version>
+        <maven.gpg.version>1.6</maven.gpg.version>
+        <maven.central.publishing.version>0.4.0</maven.central.publishing.version>
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>zcckj_releases</id>
-            <url>http://nexus.zcckj.com/repository/zcckj_releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>zcckj_snapshots</id>
-            <url>http://nexus.zcckj.com/repository/zcckj_snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version2.0</name>
+            <url>http://www.apache.org/licenses/</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/jaychang9/uid-spring-boot-starter</url>
+        <connection>scm:git:git://github.com/jaychang9/uid-spring-boot-starter.git</connection>
+        <developerConnection>scm:git:git@github.com:jaychang9/uid-spring-boot-starter.git</developerConnection>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub Issue Management</system>
+        <url>https://github.com/jaychang9/uid-spring-boot-starter/issues</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <id>jaychang</id>
+            <name>Jay Chang</name>
+            <email>jaychang1987@gmail.com</email>
+            <url>https://jaychang.cn/</url>
+            <timezone>+8</timezone>
+        </developer>
+    </developers>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -64,10 +104,9 @@
         <dependency>
             <groupId>org.apache.zookeeper</groupId>
             <artifactId>zookeeper</artifactId>
-            <version>3.4.14</version>
+            <version>${zookeeper.version}</version>
             <optional>true</optional>
         </dependency>
-
 
         <!-- Tools -->
         <dependency>
@@ -77,33 +116,75 @@
         </dependency>
     </dependencies>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <!-- Import dependency management from Spring Boot -->
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.3.12.RELEASE</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>central</id>
+            <url>https://central.sonatype.com/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>${maven.compiler.version}</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <encoding>${file.encoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${maven.source.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven.javadoc.version}</version>
+                <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>${maven.gpg.version}</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>${maven.central.publishing.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
                 </configuration>
             </plugin>
         </plugins>
