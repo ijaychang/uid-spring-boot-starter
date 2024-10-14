@@ -30,7 +30,7 @@ uid:
   timeBits: 34
   workerBits: 17
   seqBits: 12
-  zookeeperConnection: 171.188.0.161:2181
+  zookeeperConnection: localhost:2181
   type: cached
   epochStr: 2014-12-31
   service-ip:
