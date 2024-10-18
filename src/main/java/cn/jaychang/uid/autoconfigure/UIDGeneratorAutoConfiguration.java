@@ -2,7 +2,7 @@ package cn.jaychang.uid.autoconfigure;
 
 import cn.jaychang.uid.BizidGenerator;
 import cn.jaychang.uid.UidGenerator;
-import cn.jaychang.uid.worker.ZkWorkerIdAssigner;
+import cn.jaychang.uid.worker.DisposableWorkerIdAssigner;
 import cn.jaychang.uid.annotation.EnableUID;
 import cn.jaychang.uid.impl.CachedUidGenerator;
 import cn.jaychang.uid.impl.DefaultBizidGenerator;
@@ -18,8 +18,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.lang.management.ManagementFactory;
 
 /**
  * @auther: fsren
@@ -66,22 +64,21 @@ public class UIDGeneratorAutoConfiguration{
     @Bean
     @ConditionalOnMissingBean
     public UidGenerator createUidGenerator() {
-        ZkWorkerIdAssigner zkWorkerIdAssigner = new ZkWorkerIdAssigner();
-        zkWorkerIdAssigner.setZookeeperConnection(uidGeneratorProperties.getZookeeperConnection());
+        DisposableWorkerIdAssigner disposableWorkerIdAssigner = new DisposableWorkerIdAssigner();
+        disposableWorkerIdAssigner.setZookeeperConnection(uidGeneratorProperties.getZookeeperConnection());
         // 单元测试时serverPort时-1此时会影响zk的持久有序节点key名的判断，故这里将-1改为99999
         if (this.servicePort == -1) {
             this.servicePort = 99999;
         }
-        servicePort = Integer.valueOf(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
-        zkWorkerIdAssigner.setServicePort(servicePort);
+        disposableWorkerIdAssigner.setServicePort(servicePort);
 
         // 未指定服务IP地址则使用inetUtils获取
-        if (StringUtils.isBlank(zkWorkerIdAssigner.getServiceIp())) {
+        if (StringUtils.isBlank(disposableWorkerIdAssigner.getServiceIp())) {
             String defaultIpAddress = inetUtilsProperties.getDefaultIpAddress();
             if (StringUtils.isNotBlank(defaultIpAddress) && !LOCAL_LOOP_BACK_IP.equals(defaultIpAddress)) {
-                zkWorkerIdAssigner.setServiceIp(inetUtilsProperties.getDefaultIpAddress());
+                disposableWorkerIdAssigner.setServiceIp(inetUtilsProperties.getDefaultIpAddress());
             } else {
-                zkWorkerIdAssigner.setServiceIp(inetUtils.findFirstNonLoopbackAddress().getHostAddress());
+                disposableWorkerIdAssigner.setServiceIp(inetUtils.findFirstNonLoopbackAddress().getHostAddress());
             }
         }
 
@@ -93,7 +90,7 @@ public class UIDGeneratorAutoConfiguration{
         defaultUidGenerator.setTimeBits(uidGeneratorProperties.getTimeBits());
         defaultUidGenerator.setWorkerBits(uidGeneratorProperties.getWorkerBits());
         defaultUidGenerator.setEpochStr(uidGeneratorProperties.getEpochStr());
-        defaultUidGenerator.setWorkerIdAssigner(zkWorkerIdAssigner);
+        defaultUidGenerator.setWorkerIdAssigner(disposableWorkerIdAssigner);
         return defaultUidGenerator;
     }
 
