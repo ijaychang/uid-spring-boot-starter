@@ -1,9 +1,10 @@
 package cn.jaychang.uid;
 
 import cn.jaychang.uid.impl.DefaultUidGenerator;
-import cn.jaychang.uid.worker.DisposableWorkerIdAssigner;
+import cn.jaychang.uid.worker.ZkWorkerIdAssigner;
 import org.junit.Test;
 
+import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -53,7 +54,7 @@ public class UidSpringBootStarterApplicationTests {
 
     @Test
     public void test1() {
-        DisposableWorkerIdAssigner workerIdAssigner = new DisposableWorkerIdAssigner();
+        ZkWorkerIdAssigner workerIdAssigner = new ZkWorkerIdAssigner();
         workerIdAssigner.setZookeeperConnection("171.188.0.161:2181");
         workerIdAssigner.setServicePort(8088);
         workerIdAssigner.setServiceIp("10.1.80.62");
@@ -109,6 +110,13 @@ public class UidSpringBootStarterApplicationTests {
                 System.out.println(year + " " + " " + monthStr + " " + beginId + " " + endId+" " + parsedBeginId+" "+parsedEndId);
             }
         }
+
+    }
+
+    @Test
+    public void testGetPid() {
+        int servicePort = Integer.valueOf(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
+        System.out.println(servicePort);
 
     }
 

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  *
  * @author fsren
  */
-public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
+public class ZkWorkerIdAssigner implements WorkerIdAssigner {
     private static final String UID_NAMESPACE = "uid-generator";
     /** 用于分配workId*/
     private static final String SEQ_ZNODE = "/workId/sequence";
@@ -32,7 +32,7 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
     private static final int SESSION_TIMEOUT = 5000;
     private static final int CONNECTION_TIMEOUT = 5000;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DisposableWorkerIdAssigner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZkWorkerIdAssigner.class);
 
     private String zookeeperConnection;
 
