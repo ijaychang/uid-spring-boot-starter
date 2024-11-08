@@ -10,7 +10,7 @@
 
     <name>Uid Spring Boot Starter</name>
     <description>Uid Spring Boot Starter</description>
-    <url>https://github.com/jaychang9/uid-spring-boot-starter</url>
+    <url>https://github.com/ijaychang/uid-spring-boot-starter</url>
 
 
     <properties>
@@ -36,14 +36,14 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/jaychang9/uid-spring-boot-starter</url>
-        <connection>scm:git:git://github.com/jaychang9/uid-spring-boot-starter.git</connection>
-        <developerConnection>scm:git:git@github.com:jaychang9/uid-spring-boot-starter.git</developerConnection>
+        <url>https://github.com/ijaychang/uid-spring-boot-starter</url>
+        <connection>scm:git:git://github.com/ijaychang/uid-spring-boot-starter.git</connection>
+        <developerConnection>scm:git:git@github.com:ijaychang/uid-spring-boot-starter.git</developerConnection>
     </scm>
 
     <issueManagement>
         <system>GitHub Issue Management</system>
-        <url>https://github.com/jaychang9/uid-spring-boot-starter/issues</url>
+        <url>https://github.com/ijaychang/uid-spring-boot-starter/issues</url>
     </issueManagement>
 
     <developers>
